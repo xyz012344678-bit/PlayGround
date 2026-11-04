@@ -1,0 +1,20 @@
+{
+  "name": "APEX HORIZON — Open World Racing",
+  "short_name": "Apex Horizon",
+  "description": "A massive open-world driving game set on the island of Meridian. Thirty original machines, six racing events and 81 km² of road.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#07090b",
+  "theme_color": "#0b0d10",
+  "categories": ["games", "racing"],
+  "icons": [
+    {
+      "src": "assets/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

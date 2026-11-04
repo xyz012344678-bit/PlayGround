@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+<meta name="theme-color" content="#0b0d10" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<title>APEX HORIZON — Open World Racing</title>
+<link rel="manifest" href="manifest.webmanifest" />
+<link rel="icon" href="assets/icon.svg" type="image/svg+xml" />
+<link rel="stylesheet" href="css/style.css" />
+<script type="importmap">
+  { "imports": { "three": "./vendor/three.module.js", "three/addons/": "./vendor/addons/" } }
+</script>
+</head>
+<body>
+<svg class="svg-defs" aria-hidden="true">
+  <symbol id="i-map" viewBox="0 0 24 24"><path d="M9 3 3 5v16l6-2 6 2 6-2V3l-6 2-6-2Z" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M9 3v16M15 5v16" fill="none" stroke="currentColor" stroke-width="1.2" opacity=".6"/></symbol>
+  <symbol id="i-garage" viewBox="0 0 24 24"><path d="M3 21V8l9-5 9 5v13" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M7 21v-8h10v8M9 16h6" fill="none" stroke="currentColor" stroke-width="1.7"/></symbol>
+  <symbol id="i-pause" viewBox="0 0 24 24"><path d="M8 5v14M16 5v14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></symbol>
+  <symbol id="i-settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9 7 7M17 17l2.1 2.1M19.1 4.9 17 7M7 17l-2.1 2.1" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
+  <symbol id="i-camera" viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="13" rx="2" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="12.5" r="3.4" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M8 6l1.5-2h5L16 6" fill="none" stroke="currentColor" stroke-width="1.7"/></symbol>
+  <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-trophy" viewBox="0 0 24 24"><path d="M8 4h8v5a4 4 0 0 1-8 0V4Z" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M8 5H5v2a4 4 0 0 0 4 4M16 5h3v2a4 4 0 0 1-4 4M12 13v4M8 21h8M9 17h6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24"><path d="m12 3 2.7 5.7 6.3.8-4.6 4.4 1.2 6.1-5.6-3-5.6 3 1.2-6.1L3 9.5l6.3-.8L12 3Z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></symbol>
+  <symbol id="i-wheel" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 3v6M5 17l5-4M19 17l-5-4" fill="none" stroke="currentColor" stroke-width="1.4"/></symbol>
+  <symbol id="i-flag" viewBox="0 0 24 24"><path d="M5 21V4M5 5h12l-2 4 2 4H5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></symbol>
+  <symbol id="i-speed" viewBox="0 0 24 24"><path d="M4 18a8 8 0 1 1 16 0" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="m12 14 4-5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="14" r="1.6" fill="currentColor"/></symbol>
+  <symbol id="i-key" viewBox="0 0 24 24"><circle cx="8" cy="8" r="4" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="m11 11 9 9M16 16l2-2M18 18l2-2" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="11" rx="2" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M8 10V7a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="1.7"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="m4 12 5 5L20 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+</svg>
+
+<canvas id="gl"></canvas>
+<div class="grain"></div>
+<div class="vignette" id="vignette"></div>
+<div class="speedlines" id="speedlines"></div>
+
+<!-- LOADING -->
+<section id="loading" class="screen loading-screen active">
+  <div class="loading-brand">
+    <div class="brand-mark"><span></span><span></span><span></span></div>
+    <div class="brand-word">APEX <em>HORIZON</em></div>
+  </div>
+  <div class="loading-center">
+    <div class="loading-kicker">INITIALISING WORLD</div>
+    <div class="loading-huge" id="load-pct">0<span>%</span></div>
+    <div class="loading-bar"><i id="load-bar"></i></div>
+    <div class="loading-step" id="load-step">Warming up the engine…</div>
+  </div>
+  <div class="loading-tip"><span>TIP</span><p id="load-tip">Use the handbrake mid-corner to start a drift, then feather the throttle to hold it.</p></div>
+  <div class="loading-foot">APEX HORIZON · MOBILE OPEN WORLD RACING · BUILD 1.0</div>
+</section>
+
+<!-- MAIN MENU -->
+<section id="menu" class="screen menu-screen">
+  <div class="menu-top">
+    <div class="brand-row">
+      <div class="brand-mark small"><span></span><span></span><span></span></div>
+      <div class="brand-word small">APEX <em>HORIZON</em></div>
+    </div>
+    <div class="menu-meta">
+      <div class="credits-pill"><span class="cr-mark">C</span><span id="menu-credits">0</span></div>
+      <button class="icon-btn" data-action="settings" aria-label="Settings"><svg><use href="#i-settings"/></svg></button>
+    </div>
+  </div>
+
+  <div class="menu-hero">
+    <div class="hero-copy">
+      <div class="eyebrow"><span></span> OPEN WORLD RACING</div>
+      <h1>APEX<br /><em>HORIZON</em></h1>
+      <p class="hero-sub">One island. Six worlds. Every road is yours. Chase the sun across a hand-built open world where city lights meet alpine snow and the coast never ends.</p>
+      <div class="menu-actions">
+        <button id="btn-continue" class="btn btn-primary btn-xl">
+          <span class="btn-icon"><svg><use href="#i-arrow"/></svg></span>
+          <span><small>ENTER THE WORLD</small>Start Driving</span>
+        </button>
+        <button class="btn btn-glass btn-md" data-action="garage"><svg><use href="#i-garage"/></svg><span>Garage</span><b id="menu-owned">0</b></button>
+        <button class="btn btn-glass btn-md" data-action="map"><svg><use href="#i-map"/></svg><span>World Map</span></button>
+        <button class="btn btn-ghost btn-md" data-action="help"><svg><use href="#i-key"/></svg><span>How to play</span></button>
+      </div>
+      <div class="hero-metrics">
+        <div><b>81</b><span>km² of open world</span></div>
+        <div><b>30</b><span>drivable machines</span></div>
+        <div><b>6</b><span>racing events</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="menu-side">
+    <div class="side-label">FEATURED MACHINE</div>
+    <div class="featured-car">
+      <div class="featured-orb"></div>
+      <div class="featured-name" id="feat-name">Apex GT-R</div>
+      <div class="featured-class" id="feat-class">HYPERCAR · AWD</div>
+      <div class="featured-stats">
+        <div><b id="feat-power">1,020</b><span>HP</span></div>
+        <div><b id="feat-top">352</b><span>KM/H</span></div>
+        <div><b id="feat-accel">2.4</b><span>0–100</span></div>
+      </div>
+    </div>
+    <button class="text-link" data-action="garage">EXPLORE THE COLLECTION <svg><use href="#i-arrow"/></svg></button>
+  </div>
+
+  <div class="menu-bottom">
+    <div class="menu-hint"><kbd>WASD</kbd> Drive <kbd>SPACE</kbd> Drift <kbd>C</kbd> Camera <kbd>M</kbd> Map</div>
+    <div class="save-status"><span class="pulse"></span> PROGRESS SAVED LOCALLY</div>
+  </div>
+</section>
+
+<!-- HUD -->
+<div id="hud" class="hud">
+  <div class="hud-top">
+    <div class="hud-left">
+      <div class="region-chip">
+        <span class="region-dot"></span>
+        <div><b id="region-name">Festival Grounds</b><small><span id="time-of-day">17:20</span> · <span id="weather-label">CLEAR</span></small></div>
+      </div>
+      <div class="collect-chip"><svg><use href="#i-star"/></svg><span id="collect-count">0</span><small>/ 24</small></div>
+    </div>
+    <div class="race-hud" id="race-hud">
+      <div class="race-title"><span id="race-label">CITY SPRINT</span><b id="race-timer">00:00.00</b></div>
+      <div class="race-progress"><i id="race-progress"></i></div>
+      <div class="race-next"><span id="race-cp">CHECKPOINT 1 / 8</span><b id="race-dist">0 m</b></div>
+    </div>
+    <div class="hud-actions">
+      <button class="hud-btn" data-action="map" aria-label="World map"><svg><use href="#i-map"/></svg><span>M</span></button>
+      <button class="hud-btn" data-action="garage" aria-label="Garage"><svg><use href="#i-garage"/></svg><span>G</span></button>
+      <button class="hud-btn" data-action="pause" aria-label="Pause"><svg><use href="#i-pause"/></svg></button>
+    </div>
+  </div>
+
+  <div class="minimap-wrap">
+    <canvas id="minimap"></canvas>
+    <div class="minimap-ring"></div>
+    <div class="minimap-n">N</div>
+    <div class="minimap-region" id="minimap-region">FESTIVAL</div>
+  </div>
+
+  <div class="speed-panel">
+    <div class="car-chip" id="car-chip"><span class="chip-dot"></span><b id="hud-car-name">Apex GT-R</b><small id="hud-car-class">HYPERCAR</small></div>
+    <canvas id="speedo"></canvas>
+  </div>
+
+  <div class="interaction" id="interaction">
+    <span class="key">E</span>
+    <div><b id="interaction-title">ENTER GARAGE</b><small id="interaction-sub">Festival Garage</small></div>
+  </div>
+
+  <div class="race-enter" id="race-enter">
+    <span class="key">E</span>
+    <div><b id="race-enter-title">CITY SPRINT</b><small>Street race · 3.2 km</small></div>
+  </div>
+
+  <div class="controls-touch" id="touch-controls">
+    <div class="steer-group">
+      <button class="touch-btn steer" data-touch="left" aria-label="Steer left"><svg viewBox="0 0 24 24"><path d="M15 4 7 12l8 8" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <button class="touch-btn steer" data-touch="right" aria-label="Steer right"><svg viewBox="0 0 24 24"><path d="m9 4 8 8-8 8" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    </div>
+    <div class="pedal-group">
+      <button class="touch-btn brake" data-touch="brake" aria-label="Brake"><span>BRAKE</span></button>
+      <button class="touch-btn gas" data-touch="gas" aria-label="Accelerate"><span>GAS</span></button>
+      <button class="touch-btn handbrake" data-touch="handbrake" aria-label="Handbrake"><svg><use href="#i-wheel"/></svg></button>
+      <button class="touch-btn camera" data-touch="camera" aria-label="Change camera"><svg><use href="#i-camera"/></svg></button>
+    </div>
+  </div>
+
+  <div class="hud-bottom-hint" id="hud-bottom-hint"><span></span> PRESS <kbd>H</kbd> FOR CONTROLS</div>
+</div>
+
+<div class="toasts" id="toasts"></div>
+
+<!-- GARAGE -->
+<section id="garage" class="screen garage-screen">
+  <header class="garage-top">
+    <button class="back-btn" id="garage-back"><svg><use href="#i-close"/></svg></button>
+    <div class="garage-heading">
+      <span>THE COLLECTION</span>
+      <h2>Every machine. One garage.</h2>
+    </div>
+    <div class="garage-meta">
+      <div class="credits-pill"><span class="cr-mark">C</span><span id="garage-credits">0</span></div>
+      <div class="owned-pill"><svg><use href="#i-garage"/></svg><span id="garage-owned">0</span> OWNED</div>
+    </div>
+  </header>
+
+  <aside class="garage-left">
+    <div class="filter-row" id="garage-filters"></div>
+    <div class="car-list" id="garage-cars"></div>
+  </aside>
+
+  <div class="garage-center">
+    <div class="garage-tag" id="garage-tag">HYPERCAR</div>
+    <div class="garage-name"><h1 id="garage-car-name">Apex GT-R</h1><p id="garage-car-sub">All-wheel drive · 8-speed DCT</p></div>
+    <div class="stat-grid" id="garage-specs">
+      <div class="stat"><span>POWER</span><div><b id="stat-power">1020</b><small>HP</small></div></div>
+      <div class="stat"><span>TOP SPEED</span><div><b id="stat-top">352</b><small>KM/H</small></div></div>
+      <div class="stat"><span>0–100</span><div><b id="stat-accel">2.4</b><small>SEC</small></div></div>
+      <div class="stat"><span>WEIGHT</span><div><b id="stat-weight">1480</b><small>KG</small></div></div>
+    </div>
+    <div class="perf-bars">
+      <div><span>ACCELERATION</span><i><b id="bar-accel"></b></i></div>
+      <div><span>HANDLING</span><i><b id="bar-handling"></b></i></div>
+      <div><span>BRAKING</span><i><b id="bar-braking"></b></i></div>
+      <div><span>DRIFT</span><i><b id="bar-drift"></b></i></div>
+    </div>
+    <div class="garage-buttons">
+      <button class="btn btn-primary" id="garage-select"><span>SELECT & DRIVE</span><svg><use href="#i-arrow"/></svg></button>
+      <button class="btn btn-buy" id="garage-buy"><span id="garage-buy-label">BUY · 240,000</span></button>
+      <button class="btn btn-glass btn-sm" id="garage-fav"><svg><use href="#i-star"/></svg><span>FAVOURITE</span></button>
+    </div>
+  </div>
+
+  <aside class="garage-right">
+    <div class="custom-tabs">
+      <button class="active" data-tab="paint">PAINT</button>
+      <button data-tab="wheels">WHEELS</button>
+      <button data-tab="upgrades">UPGRADES</button>
+    </div>
+    <div class="custom-panel active" data-panel="paint">
+      <div class="panel-title">BODY COLOUR <span id="paint-name">Solar Flare</span></div>
+      <div class="swatch-grid" id="paint-swatches"></div>
+      <div class="panel-title">FINISH</div>
+      <div class="finish-row" id="paint-finishes">
+        <button data-finish="gloss" class="active">GLOSS</button><button data-finish="metallic">METALLIC</button><button data-finish="matte">MATTE</button><button data-finish="chrome">CHROME</button>
+      </div>
+      <div class="panel-title">ACCENT</div>
+      <div class="accent-row" id="paint-accents"></div>
+    </div>
+    <div class="custom-panel" data-panel="wheels">
+      <div class="panel-title">RIM DESIGN</div>
+      <div class="rim-list" id="rim-list"></div>
+      <div class="panel-title">RIM FINISH</div>
+      <div class="swatch-grid small" id="rim-swatches"></div>
+      <div class="panel-title">STANCE</div>
+      <div class="slider-row"><span>RIDE HEIGHT</span><input type="range" id="ride-height" min="-6" max="6" value="0" /><b id="ride-height-val">0</b></div>
+      <div class="slider-row"><span>CAMBER</span><input type="range" id="camber" min="-5" max="0" value="-1" /><b id="camber-val">-1</b></div>
+    </div>
+    <div class="custom-panel" data-panel="upgrades">
+      <div class="upgrade-row" data-upgrade="engine">
+        <div class="up-icon">01</div>
+        <div class="up-info"><b>ENGINE</b><span id="up-engine-lvl">STOCK</span><small>+ power & top speed</small></div>
+        <button class="up-btn" id="up-engine-btn">UPGRADE · 18,000</button>
+      </div>
+      <div class="upgrade-row" data-upgrade="brakes">
+        <div class="up-icon">02</div>
+        <div class="up-info"><b>BRAKES</b><span id="up-brakes-lvl">STOCK</span><small>+ stopping power</small></div>
+        <button class="up-btn" id="up-brakes-btn">UPGRADE · 12,000</button>
+      </div>
+      <div class="upgrade-row" data-upgrade="suspension">
+        <div class="up-icon">03</div>
+        <div class="up-info"><b>SUSPENSION</b><span id="up-susp-lvl">STOCK</span><small>+ grip & stability</small></div>
+        <button class="up-btn" id="up-susp-btn">UPGRADE · 15,000</button>
+      </div>
+      <div class="upgrade-row" data-upgrade="turbo">
+        <div class="up-icon">04</div>
+        <div class="up-info"><b>TURBO</b><span id="up-turbo-lvl">STOCK</span><small>+ acceleration</small></div>
+        <button class="up-btn" id="up-turbo-btn">UPGRADE · 20,000</button>
+      </div>
+      <div class="upgrade-note">Upgrades apply to the selected car and are saved automatically.</div>
+    </div>
+  </aside>
+
+  <div class="garage-drag">DRAG TO ROTATE <span>·</span> SCROLL TO ZOOM <span>·</span> DOUBLE-TAP TO RESET</div>
+</section>
+
+<!-- MAP -->
+<section id="map-screen" class="screen map-screen">
+  <header class="map-top">
+    <button class="back-btn" id="map-back"><svg><use href="#i-close"/></svg></button>
+    <div><span>THE ISLAND OF MERIDIAN</span><h2>World Map</h2></div>
+    <div class="map-legend">
+      <span><i class="lg-city"></i>City</span><span><i class="lg-race"></i>Event</span><span><i class="lg-collect"></i>Collectible</span><span><i class="lg-you"></i>You</span>
+    </div>
+  </header>
+  <div class="map-stage">
+    <canvas id="worldmap"></canvas>
+    <div class="map-coords" id="map-coords">X 0.0 · Z 0.0</div>
+    <div class="map-zoom"><button id="map-zoom-in">+</button><button id="map-zoom-out">−</button><button id="map-reset">◎</button></div>
+    <div class="map-tooltip" id="map-tooltip"></div>
+  </div>
+  <aside class="map-side">
+    <div class="map-side-head"><span>NAVIGATION</span><b id="map-region-name">Festival Grounds</b></div>
+    <p class="map-hint">Tap anywhere on the map to set a fast-travel point, or launch an event below.</p>
+    <div class="map-events" id="map-events"></div>
+    <div class="map-travel">
+      <div class="travel-target"><span>DESTINATION</span><b id="travel-name">Tap the map</b><small id="travel-coords">—</small></div>
+      <button class="btn btn-primary" id="map-travel-btn">FAST TRAVEL</button>
+    </div>
+    <div class="map-explore">
+      <span>COLLECTIBLES</span><b id="map-collect">0 / 24</b>
+      <div class="map-progress"><i id="map-collect-bar"></i></div>
+    </div>
+  </aside>
+</section>
+
+<!-- SETTINGS -->
+<section id="settings" class="screen modal-screen">
+  <div class="modal-card settings-card">
+    <header><div><span>SYSTEM</span><h2>Settings</h2></div><button class="back-btn" data-close="settings"><svg><use href="#i-close"/></svg></button></header>
+    <div class="settings-body">
+      <div class="setting-group">
+        <h3>GRAPHICS</h3>
+        <div class="segmented" id="quality-select">
+          <button data-q="low">LOW</button><button data-q="medium">MEDIUM</button><button data-q="high">HIGH</button><button data-q="ultra">ULTRA</button>
+        </div>
+        <div class="setting-row"><div><b>Shadows</b><small>Dynamic sun shadows</small></div><button class="toggle active" id="set-shadows"><i></i></button></div>
+        <div class="setting-row"><div><b>Motion effects</b><small>Speed lines and camera shake</small></div><button class="toggle active" id="set-motion"><i></i></button></div>
+      </div>
+      <div class="setting-group">
+        <h3>DRIVING</h3>
+        <div class="setting-row"><div><b>Steering assist</b><small>Gentle help at high speed</small></div><button class="toggle active" id="set-assist"><i></i></button></div>
+        <div class="setting-row"><div><b>Manual gearbox</b><small>Shift with Q / E</small></div><button class="toggle" id="set-manual"><i></i></button></div>
+        <div class="setting-row slider-row"><span>STEERING SENSITIVITY</span><input type="range" id="set-sens" min="40" max="140" value="100" /><b id="set-sens-val">100%</b></div>
+        <div class="setting-row"><div><b>Touch controls</b><small>Show on-screen driving controls</small></div><button class="toggle active" id="set-touch"><i></i></button></div>
+      </div>
+      <div class="setting-group">
+        <h3>AUDIO & WORLD</h3>
+        <div class="setting-row"><div><b>Engine & effects</b><small>Synthesised vehicle audio</small></div><button class="toggle active" id="set-audio"><i></i></button></div>
+        <div class="setting-row"><div><b>Dynamic time</b><small>Let the sun move across the island</small></div><button class="toggle active" id="set-daynight"><i></i></button></div>
+        <div class="setting-row"><div><b>Weather</b><small>Cycle between clear and rain</small></div><div class="mini-seg" id="set-weather"><button data-w="clear" class="active">CLEAR</button><button data-w="rain">RAIN</button></div></div>
+        <div class="setting-row"><div><b>Time of day</b><small>Set the golden hour</small></div><input type="range" id="set-time" min="0" max="24" step="0.1" value="17.3" class="wide-range" /></div>
+      </div>
+      <div class="setting-group">
+        <h3>SAVE DATA</h3>
+        <div class="setting-row"><div><b>Reset progress</b><small>Erase cars, credits and records</small></div><button class="btn btn-danger btn-sm" id="set-reset">RESET</button></div>
+      </div>
+    </div>
+    <footer><span>Settings save automatically.</span><button class="btn btn-primary btn-sm" data-close="settings">DONE</button></footer>
+  </div>
+</section>
+
+<!-- HELP -->
+<section id="help" class="screen modal-screen">
+  <div class="modal-card help-card">
+    <header><div><span>DRIVER BRIEFING</span><h2>How to play</h2></div><button class="back-btn" data-close="help"><svg><use href="#i-close"/></svg></button></header>
+    <div class="help-grid">
+      <div><div class="help-icon"><svg><use href="#i-wheel"/></svg></div><h3>Drive</h3><p><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> or arrow keys. On mobile, use the touch pedals and steering arrows. Tap <b>GAS</b> to launch.</p></div>
+      <div><div class="help-icon"><svg><use href="#i-speed"/></svg></div><h3>Drift</h3><p>Hold <kbd>SPACE</kbd> or the handbrake while turning, then feed in the throttle. Higher drift stat keeps the slide composed.</p></div>
+      <div><div class="help-icon"><svg><use href="#i-map"/></svg></div><h3>Explore</h3><p>Open the map with <kbd>M</kbd>, fast travel to any discovered region and hunt the 24 golden gears hidden across the island.</p></div>
+      <div><div class="help-icon"><svg><use href="#i-flag"/></svg></div><h3>Race</h3><p>Drive into a glowing event gate and press <kbd>E</kbd>, or launch from the map. Beat the target time for gold and extra credits.</p></div>
+      <div><div class="help-icon"><svg><use href="#i-garage"/></svg></div><h3>Collect & tune</h3><p>Earn credits to buy 30 cars. In the garage, change paint, rims and upgrades. Every car has its own physics and engine note.</p></div>
+      <div><div class="help-icon"><svg><use href="#i-camera"/></svg></div><h3>Camera</h3><p><kbd>C</kbd> cycles chase, near, hood, cockpit and cinematic cameras. <kbd>R</kbd> resets the car. <kbd>H</kbd> shows this briefing.</p></div>
+    </div>
+    <footer><button class="btn btn-primary" data-close="help">BACK TO THE ROAD</button></footer>
+  </div>
+</section>
+
+<!-- PAUSE -->
+<section id="pause" class="screen modal-screen">
+  <div class="modal-card pause-card">
+    <header><div><span>PAUSED</span><h2>Apex Horizon</h2></div></header>
+    <div class="pause-car"><span id="pause-car-name">Apex GT-R</span><small id="pause-location">Festival Grounds</small></div>
+    <div class="pause-menu">
+      <button class="btn btn-primary" data-action="resume"><span>RESUME</span><svg><use href="#i-arrow"/></svg></button>
+      <button class="btn btn-glass" data-action="garage"><svg><use href="#i-garage"/></svg><span>Garage</span></button>
+      <button class="btn btn-glass" data-action="map"><svg><use href="#i-map"/></svg><span>World Map</span></button>
+      <button class="btn btn-glass" data-action="settings"><svg><use href="#i-settings"/></svg><span>Settings</span></button>
+      <button class="btn btn-ghost" data-action="help"><svg><use href="#i-key"/></svg><span>Controls</span></button>
+      <button class="btn btn-ghost" data-action="menu"><svg><use href="#i-close"/></svg><span>Main Menu</span></button>
+    </div>
+    <div class="pause-stats">
+      <div><span>DISTANCE DRIVEN</span><b id="pause-distance">0 km</b></div>
+      <div><span>BEST TOP SPEED</span><b id="pause-top">0 km/h</b></div>
+      <div><span>EVENTS WON</span><b id="pause-wins">0</b></div>
+    </div>
+  </div>
+</section>
+
+<!-- RESULTS -->
+<section id="results" class="screen modal-screen">
+  <div class="modal-card results-card">
+    <div class="results-kicker">EVENT COMPLETE</div>
+    <h1 id="result-title">City Sprint</h1>
+    <div class="results-medal" id="result-medal"><svg><use href="#i-trophy"/></svg></div>
+    <div class="result-grade" id="result-grade">GOLD</div>
+    <div class="results-time"><b id="result-time">02:14.83</b><span id="result-target">TARGET 02:20.00</span></div>
+    <div class="results-reward"><span>REWARD</span><b id="result-reward">C 25,000</b><small id="result-best">NEW PERSONAL BEST</small></div>
+    <div class="results-buttons">
+      <button class="btn btn-primary" data-action="continue-race"><span>FREE ROAM</span><svg><use href="#i-arrow"/></svg></button>
+      <button class="btn btn-glass" id="result-retry">RETRY EVENT</button>
+    </div>
+  </div>
+</section>
+
+<div id="screen-fade" class="screen-fade"></div>
+<div id="rotate-hint" class="rotate-hint"><div class="rotate-phone"><span></span></div><b>ROTATE YOUR DEVICE</b><p>APEX HORIZON is best in landscape.</p></div>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
